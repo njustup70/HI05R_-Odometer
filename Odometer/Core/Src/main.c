@@ -27,6 +27,8 @@
 /* USER CODE BEGIN Includes */
 #include "bsp_usart.h"
 #include "HI05R.h"
+#include "DTek_TLE5012B.h"
+#include <stdio.h> 
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -123,7 +125,16 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-
+    errorTypes checkError = NO_ERROR;
+    double d = 0.0;
+    double AngleSpeed=0.0;
+    double AngleValue;
+    double UpdAngleSpeed;
+    double UpdAngleValue;
+      double Temperature;
+      double AngleRange;
+    int16_t NumRevolutions = 0;
+    int16_t numRev = 0;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -149,19 +160,64 @@ int main(void)
   MX_SPI1_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
+
+
   init_config.usart_handle = &huart2;
   init_config.recv_buff_size = 100;
   init_config.module_callback = Hi05RCallBack; // 这里传入的是静态函数,需要注意参数类型
   USARTRegister(&Hi05RUart, &init_config);
+
+  
+    SPI_CS_DISABLE;
+    checkError = readBlockCRC();
+//    printf("Init done!!! ERROR CODE: 0x%02X\r\n", checkError);
+    checkError = NO_ERROR;
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+      HAL_Delay(500);
+
+         if (checkError == NO_ERROR)
+        {
+            checkError = getAngleSpeed(&AngleSpeed);
+            // printf("角速度: %.04f\r\n", d);
+
+            checkError = getAngleValue(&AngleValue);
+            // printf("角Value: %.04f\r\n", d);
+
+            checkError = getNumRevolutions(&NumRevolutions);
+            // printf("转数: %d\r\n", numRev);
+
+            checkError = getUpdAngleSpeed(&UpdAngleSpeed);
+            // printf("Upd角速度: %.04f\r\n", d);
+
+            checkError = getUpdAngleValue(&UpdAngleValue);
+            // printf("Upd角Value: %.04f\r\n", d);
+
+            checkError = getUpdNumRevolutions(&numRev);
+            // printf("Upd转数: %d\r\n", numRev);
+
+            checkError = getTemperature(&Temperature);
+            // printf("温度: %.04f\r\n", d);
+
+            checkError = getAngleRange(&AngleRange);
+            // printf("角范围: %.04f\r\n", d);
+
+            // printf("\r\n\r\n\r\n");
+        }
+        else
+        {
+            // printf("**************************************ERROR CODE: 0x%02X\r\n", checkError);
+            checkError = NO_ERROR;
+        }
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    
   }
   /* USER CODE END 3 */
 }
