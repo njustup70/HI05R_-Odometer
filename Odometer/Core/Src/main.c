@@ -20,6 +20,7 @@
 #include "main.h"
 #include "dma.h"
 #include "spi.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -85,6 +86,24 @@ USARTInstance Hi05RUart; // HIO5R
 USART_Init_Config_s init_config;
 imu_hi05r_t odom_imu;
 
+volatile uint8_t read_encoder_flag = 0; // 定时器触发标志位
+
+// 传感器数据存储
+double AngleValue = 0.0;        // 实时角度 (度)
+double AngleSpeed = 0.0;        // 实时角速度 (度/秒)
+int16_t NumRevolutions = 0;     // 实时圈数
+
+double UpdAngleValue = 0.0;     // 快照角度 (度)
+double UpdAngleSpeed = 0.0;     // 快照角速度 (度/秒)
+int16_t numRev = 0;             // 快照圈数
+
+double Temperature = 0.0;       // 传感器温度 (摄氏度)
+double AngleRange = 0.0;        // 角度量程设置
+
+errorTypes checkError = NO_ERROR; // 全局错误状态码
+
+
+
 void Hi05RCallBack(void *param)
 {
   uint8_t *rx_buf = Hi05RUart.recv_buff;
@@ -115,6 +134,62 @@ void Hi05RCallBack(void *param)
     HI05R_get(&odom_imu, rx_buf);
   }
 }
+
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+    if(htim->Instance == TIM1) 
+    {
+        read_encoder_flag = 1; // 通知主循环去读数据
+    }
+}
+void Read_All_Sensor_Data(void)
+{
+    // 等待定时器中断立下标志位
+    if (read_encoder_flag == 1)
+    {
+        read_encoder_flag = 0; // 进门立刻清除标志位
+        checkError = NO_ERROR; // 确保初始状态为无错误
+
+        /* =========================================================
+         * 第一步：读取实时数据
+         * ========================================================= */
+        if (checkError == NO_ERROR) checkError = getAngleValue(&AngleValue);
+        if (checkError == NO_ERROR) checkError = getAngleSpeed(&AngleSpeed);
+        if (checkError == NO_ERROR) checkError = getNumRevolutions(&NumRevolutions);
+
+        /* =========================================================
+         * 第二步：读取快照数据 (底盘运动学解算的核心数据)
+         * ========================================================= */
+        if (checkError == NO_ERROR) 
+        {
+            // 仅当前面没出错时，才发送锁存脉冲
+            triggerUpdate(); 
+            checkError = getUpdAngleValue(&UpdAngleValue);
+        }
+        if (checkError == NO_ERROR) checkError = getUpdAngleSpeed(&UpdAngleSpeed);
+        if (checkError == NO_ERROR) checkError = getUpdNumRevolutions(&numRev);
+
+        /* =========================================================
+         * 第三步：读取系统状态与配置
+         * ========================================================= */
+        if (checkError == NO_ERROR) checkError = getTemperature(&Temperature);
+        if (checkError == NO_ERROR) checkError = getAngleRange(&AngleRange);
+
+        /* =========================================================
+         * 结果判定与处理
+         * ========================================================= */
+        if (checkError == NO_ERROR) 
+        {
+
+        }
+        else 
+        {
+            // 错误归零，等待下一个定时器周期重新尝试
+            checkError = NO_ERROR; 
+        }
+    }
+}
 /* USER CODE END 0 */
 
 /**
@@ -125,16 +200,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-    errorTypes checkError = NO_ERROR;
-    double d = 0.0;
-    double AngleSpeed=0.0;
-    double AngleValue;
-    double UpdAngleSpeed;
-    double UpdAngleValue;
-      double Temperature;
-      double AngleRange;
-    int16_t NumRevolutions = 0;
-    int16_t numRev = 0;
+
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -159,8 +225,10 @@ int main(void)
   MX_USART2_UART_Init();
   MX_SPI1_Init();
   MX_USART1_UART_Init();
+  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
 
+  HAL_TIM_Base_Start_IT(&htim1);
 
   init_config.usart_handle = &huart2;
   init_config.recv_buff_size = 100;
@@ -178,42 +246,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-      HAL_Delay(500);
 
-         if (checkError == NO_ERROR)
-        {
-            checkError = getAngleSpeed(&AngleSpeed);
-            // printf("角速度: %.04f\r\n", d);
-
-            checkError = getAngleValue(&AngleValue);
-            // printf("角Value: %.04f\r\n", d);
-
-            checkError = getNumRevolutions(&NumRevolutions);
-            // printf("转数: %d\r\n", numRev);
-
-            checkError = getUpdAngleSpeed(&UpdAngleSpeed);
-            // printf("Upd角速度: %.04f\r\n", d);
-
-            checkError = getUpdAngleValue(&UpdAngleValue);
-            // printf("Upd角Value: %.04f\r\n", d);
-
-            checkError = getUpdNumRevolutions(&numRev);
-            // printf("Upd转数: %d\r\n", numRev);
-
-            checkError = getTemperature(&Temperature);
-            // printf("温度: %.04f\r\n", d);
-
-            checkError = getAngleRange(&AngleRange);
-            // printf("角范围: %.04f\r\n", d);
-
-            // printf("\r\n\r\n\r\n");
-        }
-        else
-        {
-            // printf("**************************************ERROR CODE: 0x%02X\r\n", checkError);
-            checkError = NO_ERROR;
-        }
-
+      Read_All_Sensor_Data();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
