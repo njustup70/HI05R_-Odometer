@@ -80,6 +80,10 @@ double angle1 = 0.0;
 double angle2 = 0.0;
 int16_t rev1 = 0;   // 一号磁编圈数 (有符号的 9 位整数，可表示正反转)
 int16_t rev2 = 0;   // 二号磁编圈数
+double angle360_1 ;
+double total_angle_1;
+double angle360_2 ;
+double total_angle_2;
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -99,8 +103,7 @@ void SystemClock_Config(void);
 USARTInstance Hi05RUart; // HIO5R
 USART_Init_Config_s init_config;
 imu_hi05r_t odom_imu;
-double angle360_1 ;
-double total_angle_1;
+
 void Hi05RCallBack(void *param)
 {
   uint8_t *rx_buf = Hi05RUart.recv_buff;
@@ -189,9 +192,14 @@ int main(void)
            // 玩法 1：获取单圈 0~360 度的表达
              angle360_1 = angle1;
             if (angle360_1 < 0.0) angle360_1 += 360.0;
-
+						
+					             angle360_2 = angle2;
+            if (angle360_2 < 0.0) angle360_2 += 360.0;
+					
+					
             // 玩法 2：获取多圈累加的绝对连续角度（非常适合传给 PID 做位置闭环）
-             total_angle_1 = (rev1 * 360.0) + angle1;
+             total_angle_1 = (rev1 * 360.0) + angle360_1;
+					 total_angle_2 = (rev2 * 360.0) + angle360_2;
         } 
         else 
         {

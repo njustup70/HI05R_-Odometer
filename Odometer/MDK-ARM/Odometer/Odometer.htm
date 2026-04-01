@@ -3,9 +3,9 @@
 <title>Static Call Graph - [Odometer\Odometer.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image Odometer\Odometer.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6220000: Last Updated: Wed Apr  1 22:35:37 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6220000: Last Updated: Wed Apr  1 22:42:46 2026
 <BR><P>
-<H3>Maximum Stack Usage =        320 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
+<H3>Maximum Stack Usage =        344 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
 __rt_entry_main &rArr; main &rArr; getUpdAngleValue &rArr; readUpdAngleValue &rArr; readFromSensor &rArr; HAL_SPI_Receive &rArr; HAL_SPI_TransmitReceive &rArr; SPI_EndRxTxTransaction &rArr; SPI_WaitFlagStateUntilTimeout
 <P>
@@ -241,7 +241,7 @@ Global Symbols
 <P><STRONG><a name="[fe]"></a>__rt_entry_postsh_1</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, __rtentry2.o(.ARM.Collect$$rtentry$$00000009))
 
 <P><STRONG><a name="[69]"></a>__rt_entry_main</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, __rtentry2.o(.ARM.Collect$$rtentry$$0000000D))
-<BR><BR>[Stack]<UL><LI>Max Depth = 320 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 344 + Unknown Stack Size
 <LI>Call Chain = __rt_entry_main &rArr; main &rArr; getUpdAngleValue &rArr; readUpdAngleValue &rArr; readFromSensor &rArr; HAL_SPI_Receive &rArr; HAL_SPI_TransmitReceive &rArr; SPI_EndRxTxTransaction &rArr; SPI_WaitFlagStateUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[6a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
@@ -657,11 +657,11 @@ Global Symbols
 <P><STRONG><a name="[ac]"></a>HAL_GPIO_WritePin</STRONG> (Thumb, 46 bytes, Stack size 8 bytes, stm32f4xx_hal_gpio.o(.text.HAL_GPIO_WritePin))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = HAL_GPIO_WritePin
 </UL>
-<BR>[Called By]<UL><LI><a href="#[b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TLE_CS_Enable
-<LI><a href="#[c7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;triggerUpdate_Both
+<BR>[Called By]<UL><LI><a href="#[c7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;triggerUpdate_Both
 <LI><a href="#[b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TLE_CS_Disable
 <LI><a href="#[ab]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_GPIO_Init
 <LI><a href="#[cb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;triggerUpdate
+<LI><a href="#[b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TLE_CS_Enable
 </UL>
 
 <P><STRONG><a name="[75]"></a>HAL_GetTick</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, stm32f4xx_hal.o(.text.HAL_GetTick))
@@ -1145,8 +1145,8 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[6a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[6a]"></a>main</STRONG> (Thumb, 432 bytes, Stack size 48 bytes, main.o(.text.main))
-<BR><BR>[Stack]<UL><LI>Max Depth = 320 + Unknown Stack Size
+<P><STRONG><a name="[6a]"></a>main</STRONG> (Thumb, 624 bytes, Stack size 72 bytes, main.o(.text.main))
+<BR><BR>[Stack]<UL><LI>Max Depth = 344 + Unknown Stack Size
 <LI>Call Chain = main &rArr; getUpdAngleValue &rArr; readUpdAngleValue &rArr; readFromSensor &rArr; HAL_SPI_Receive &rArr; HAL_SPI_TransmitReceive &rArr; SPI_EndRxTxTransaction &rArr; SPI_WaitFlagStateUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[7b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_Delay
@@ -1173,11 +1173,11 @@ Global Symbols
 <P><STRONG><a name="[ca]"></a>readFromSensor</STRONG> (Thumb, 218 bytes, Stack size 48 bytes, dtek_tle5012b.o(.text.readFromSensor))
 <BR><BR>[Stack]<UL><LI>Max Depth = 224<LI>Call Chain = readFromSensor &rArr; HAL_SPI_Receive &rArr; HAL_SPI_TransmitReceive &rArr; SPI_EndRxTxTransaction &rArr; SPI_WaitFlagStateUntilTimeout
 </UL>
-<BR>[Calls]<UL><LI><a href="#[b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TLE_CS_Enable
-<LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_SPI_Receive
+<BR>[Calls]<UL><LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_SPI_Receive
 <LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_SPI_Transmit
 <LI><a href="#[b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TLE_CS_Disable
 <LI><a href="#[bd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;checkSafety
+<LI><a href="#[b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TLE_CS_Enable
 </UL>
 <BR>[Called By]<UL><LI><a href="#[c6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;readUpdAngleRevolution
 <LI><a href="#[c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;readUpdAngleValue
@@ -1202,20 +1202,20 @@ Global Symbols
 <P><STRONG><a name="[c0]"></a>resetSafety</STRONG> (Thumb, 108 bytes, Stack size 32 bytes, dtek_tle5012b.o(.text.resetSafety))
 <BR><BR>[Stack]<UL><LI>Max Depth = 152<LI>Call Chain = resetSafety &rArr; HAL_SPI_Transmit &rArr; SPI_EndRxTxTransaction &rArr; SPI_WaitFlagStateUntilTimeout
 </UL>
-<BR>[Calls]<UL><LI><a href="#[b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TLE_CS_Enable
-<LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_SPI_Transmit
+<BR>[Calls]<UL><LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_SPI_Transmit
 <LI><a href="#[b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TLE_CS_Disable
 <LI><a href="#[cb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;triggerUpdate
+<LI><a href="#[b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TLE_CS_Enable
 </UL>
 <BR>[Called By]<UL><LI><a href="#[bd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;checkSafety
 </UL>
 
 <P><STRONG><a name="[cb]"></a>triggerUpdate</STRONG> (Thumb, 80 bytes, Stack size 24 bytes, dtek_tle5012b.o(.text.triggerUpdate))
-<BR><BR>[Stack]<UL><LI>Max Depth = 48<LI>Call Chain = triggerUpdate &rArr; TLE_CS_Enable &rArr; HAL_GPIO_WritePin
+<BR><BR>[Stack]<UL><LI>Max Depth = 48<LI>Call Chain = triggerUpdate &rArr; TLE_CS_Disable &rArr; HAL_GPIO_WritePin
 </UL>
-<BR>[Calls]<UL><LI><a href="#[b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TLE_CS_Enable
-<LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
+<BR>[Calls]<UL><LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
 <LI><a href="#[b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TLE_CS_Disable
+<LI><a href="#[b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TLE_CS_Enable
 </UL>
 <BR>[Called By]<UL><LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;resetSafety
 </UL>

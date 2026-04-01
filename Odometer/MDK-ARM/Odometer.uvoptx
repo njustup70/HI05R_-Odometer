@@ -243,7 +243,7 @@
         <Ww>
           <count>17</count>
           <WinNumber>1</WinNumber>
-          <ItemText>total_angle_2</ItemText>
+          <ItemText>angle360_1</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
