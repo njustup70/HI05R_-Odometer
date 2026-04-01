@@ -245,6 +245,11 @@
           <WinNumber>1</WinNumber>
           <ItemText>angle360_1</ItemText>
         </Ww>
+        <Ww>
+          <count>18</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>total_angle_2</ItemText>
+        </Ww>
       </WatchWindow1>
       <Tracepoint>
         <THDelay>0</THDelay>

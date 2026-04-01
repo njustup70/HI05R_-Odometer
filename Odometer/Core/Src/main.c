@@ -64,18 +64,7 @@ static void crc16_update(uint16_t *currectCrc, const uint8_t *src, uint32_t leng
   }
   *currectCrc = crc;
 }
-    errorTypes checkError = NO_ERROR;
-    double d = 0.0;
-    double AngleSpeed=0.0;
-    double AngleValue;
-    double UpdAngleSpeed;
-    double UpdAngleValue;
-      double Temperature;
-      double AngleRange;
-    int16_t NumRevolutions = 0;
-    int16_t numRev = 0;
-
-
+//参数
 double angle1 = 0.0;
 double angle2 = 0.0;
 int16_t rev1 = 0;   // 一号磁编圈数 (有符号的 9 位整数，可表示正反转)
@@ -165,9 +154,7 @@ int main(void)
   
     TLE_CS_Disable(TLE_SENSOR_1);
     TLE_CS_Disable(TLE_SENSOR_1);
-//    checkError = readBlockCRC();
-//    printf("Init done!!! ERROR CODE: 0x%02X\r\n", checkError);
-    checkError = NO_ERROR;
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
