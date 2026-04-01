@@ -86,7 +86,7 @@
 #define SPEED                   500000
 
 // delay for the update
-#define DELAYuS                 1
+#define DELAYuS                 50
 
 // dummy variable used for receive. Each time this is sent, it is for the purposes of receiving using SPI transfer.
 #define DUMMY                   0xFFFF
