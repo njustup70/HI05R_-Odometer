@@ -64,7 +64,22 @@ static void crc16_update(uint16_t *currectCrc, const uint8_t *src, uint32_t leng
   }
   *currectCrc = crc;
 }
+    errorTypes checkError = NO_ERROR;
+    double d = 0.0;
+    double AngleSpeed=0.0;
+    double AngleValue;
+    double UpdAngleSpeed;
+    double UpdAngleValue;
+      double Temperature;
+      double AngleRange;
+    int16_t NumRevolutions = 0;
+    int16_t numRev = 0;
 
+
+double angle1 = 0.0;
+double angle2 = 0.0;
+int16_t rev1 = 0;   // 一号磁编圈数 (有符号的 9 位整数，可表示正反转)
+int16_t rev2 = 0;   // 二号磁编圈数
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -84,7 +99,8 @@ void SystemClock_Config(void);
 USARTInstance Hi05RUart; // HIO5R
 USART_Init_Config_s init_config;
 imu_hi05r_t odom_imu;
-
+double angle360_1 ;
+double total_angle_1;
 void Hi05RCallBack(void *param)
 {
   uint8_t *rx_buf = Hi05RUart.recv_buff;
@@ -96,21 +112,6 @@ void Hi05RCallBack(void *param)
 		    payload_len = rx_buf[2] + (rx_buf[3] << 8);
     if (payload_len != 76)
       return;
-		
-		
-//    uint16_t calc_crc;
-//    calc_crc = 0;
-
-//    /* Calculate 5A A5 and LEN field crc */
-//    crc16_update(&calc_crc, rx_buf, 4);
-//    /* Calculate payload crc */
-//    crc16_update(&calc_crc, rx_buf + 6, payload_len);
-//		
-//    uint16_t received_crc = (rx_buf[5]); // 假设 CRC 是低字节在前
-
-//    if (received_crc != calc_crc)
-//      return;
-
     // 5. 传入结构体地址
     HI05R_get(&odom_imu, rx_buf);
   }
@@ -125,16 +126,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-    errorTypes checkError = NO_ERROR;
-    double d = 0.0;
-    double AngleSpeed=0.0;
-    double AngleValue;
-    double UpdAngleSpeed;
-    double UpdAngleValue;
-      double Temperature;
-      double AngleRange;
-    int16_t NumRevolutions = 0;
-    int16_t numRev = 0;
+
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -168,8 +160,9 @@ int main(void)
   USARTRegister(&Hi05RUart, &init_config);
 
   
-    SPI_CS_DISABLE;
-    checkError = readBlockCRC();
+    TLE_CS_Disable(TLE_SENSOR_1);
+    TLE_CS_Disable(TLE_SENSOR_1);
+//    checkError = readBlockCRC();
 //    printf("Init done!!! ERROR CODE: 0x%02X\r\n", checkError);
     checkError = NO_ERROR;
   /* USER CODE END 2 */
@@ -178,41 +171,36 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-      HAL_Delay(500);
+      // 1. 发送硬件同步脉冲：两个磁编在同一瞬间将【角度、速度、圈数】存入各自的 Update Buffer
+        triggerUpdate_Both();
 
-         if (checkError == NO_ERROR)
+        // 2. 依次读取一号磁编保存在 Update Buffer 里的【角度】和【圈数】
+        errorTypes err_a1 = getUpdAngleValue(TLE_SENSOR_1, &angle1);
+        errorTypes err_r1 = getUpdNumRevolutions(TLE_SENSOR_1, &rev1);
+
+        // 3. 依次读取二号磁编保存在 Update Buffer 里的【角度】和【圈数】
+        errorTypes err_a2 = getUpdAngleValue(TLE_SENSOR_2, &angle2);
+        errorTypes err_r2 = getUpdNumRevolutions(TLE_SENSOR_2, &rev2);
+
+        // 4. 数据校验与应用计算
+        if(err_a1 == NO_ERROR && err_r1 == NO_ERROR && 
+           err_a2 == NO_ERROR && err_r2 == NO_ERROR) 
         {
-            checkError = getAngleSpeed(&AngleSpeed);
-            // printf("角速度: %.04f\r\n", d);
+           // 玩法 1：获取单圈 0~360 度的表达
+             angle360_1 = angle1;
+            if (angle360_1 < 0.0) angle360_1 += 360.0;
 
-            checkError = getAngleValue(&AngleValue);
-            // printf("角Value: %.04f\r\n", d);
-
-            checkError = getNumRevolutions(&NumRevolutions);
-            // printf("转数: %d\r\n", numRev);
-
-            checkError = getUpdAngleSpeed(&UpdAngleSpeed);
-            // printf("Upd角速度: %.04f\r\n", d);
-
-            checkError = getUpdAngleValue(&UpdAngleValue);
-            // printf("Upd角Value: %.04f\r\n", d);
-
-            checkError = getUpdNumRevolutions(&numRev);
-            // printf("Upd转数: %d\r\n", numRev);
-
-            checkError = getTemperature(&Temperature);
-            // printf("温度: %.04f\r\n", d);
-
-            checkError = getAngleRange(&AngleRange);
-            // printf("角范围: %.04f\r\n", d);
-
-            // printf("\r\n\r\n\r\n");
-        }
-        else
+            // 玩法 2：获取多圈累加的绝对连续角度（非常适合传给 PID 做位置闭环）
+             total_angle_1 = (rev1 * 360.0) + angle1;
+        } 
+        else 
         {
-            // printf("**************************************ERROR CODE: 0x%02X\r\n", checkError);
-            checkError = NO_ERROR;
+            // 如果出错（通常是 SPI 干扰导致 CRC 错误），当前循环放弃这帧数据，等下一轮
+            // printf("SPI 读取 CRC 错误！\r\n");
         }
+
+        // 适当控制循环读取的频率 (比如 5ms 读一次，即 200Hz)
+        HAL_Delay(5);
 
     /* USER CODE END WHILE */
 

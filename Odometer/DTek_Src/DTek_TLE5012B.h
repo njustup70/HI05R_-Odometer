@@ -3,8 +3,20 @@
 
 #include <stdint.h>
 #include "main.h"
-#define SPI_CS_ENABLE  HAL_GPIO_WritePin(CS_1_GPIO_Port, CS_1_Pin, GPIO_PIN_RESET)
-#define SPI_CS_DISABLE HAL_GPIO_WritePin(CS_1_GPIO_Port, CS_1_Pin, GPIO_PIN_SET)
+
+/* ==========================================
+ * 新增：多传感器 ID 枚举
+ * ========================================== */
+typedef enum {
+    TLE_SENSOR_1 = 0,
+    TLE_SENSOR_2
+} TLE5012B_SensorID;
+
+// 声明片选与同步控制函数
+void TLE_CS_Enable(TLE5012B_SensorID id);
+void TLE_CS_Disable(TLE5012B_SensorID id);
+void triggerUpdate_Both(void);
+void triggerUpdate(TLE5012B_SensorID id);
 
 // Error masks for safety words
 #define SYSTEM_ERROR_MASK           0x4000
@@ -53,63 +65,28 @@
 #define WRITE_INTMODE_4             0x50E1
 #define WRITE_TEMP_COEFF            0x50F1
 
-// mask to check if the command want the value in the register or the value in the update buffer
 #define CHECK_CMD_UPDATE            0x0400
-
-// values used for calculating the CRC
 #define CRC_POLYNOMIAL              0x1D
 #define CRC_SEED                    0xFF
 #define CRC_NUM_REGISTERS           8
 
-// Values used to calculate 15 bit signed int sent by the sensor
 #define DELETE_BIT_15               0x7FFF
 #define CHANGE_UINT_TO_INT_15       32768
 #define CHECK_BIT_14                0x4000
-
-// values used to calculate 9 bit signed int sent by the sensor
 #define DELETE_7BITS                0x01FF
 #define CHANGE_UNIT_TO_INT_9        512
 #define CHECK_BIT_9                 0x0100
-
-// values used to for final calculations of angle speed, revolutions, range and value
 #define POW_2_15                    32768.0
 #define POW_2_7                     128.0
 #define ANGLE_360_VAL               360.0
-
-// values used to calculate the temperature
 #define TEMP_OFFSET                 152.0
 #define TEMP_DIV                    2.776
-
 #define GET_BIT_14_4                0x7FF0
 
-// default speed of SPI transfer
-#define SPEED                   500000
+#define SPEED                       500000
+#define DELAYuS                     1
+#define DUMMY                       0xFFFF
 
-// delay for the update
-#define DELAYuS                 1
-
-// dummy variable used for receive. Each time this is sent, it is for the purposes of receiving using SPI transfer.
-#define DUMMY                   0xFFFF
-
-/**
- * This is used for keeping track of which register need to have its value changed, so that you don't need to read all the _registers each time the CRC needs to be updated
- */
-//typedef enum registerIndex
-//{
-//  INT_MODE2_INDEX = 0x00,
-//  INT_MODE3_INDEX = 0x01,
-//  OFFSET_X_INDEX = 0x02,
-//  OFFSET_Y_INDEX = 0x03,
-//  SYNCH_INDEX = 0x04,
-//  IFAB_INDEX = 0x05,
-//  INT_MODE4_INDEX = 0x06,
-//  TEMP_COEFF_INDEX = 0x07,
-//  NO_INDEX = 0x08,
-//}registerIndex;
-
-/**
- * Error types from safety word
- */
 typedef enum errorTypes {
     NO_ERROR = 0x00,
     SYSTEM_ERROR = 0x01,
@@ -118,26 +95,20 @@ typedef enum errorTypes {
     CRC_ERROR = 0xFF
 } errorTypes;
 
-errorTypes readBlockCRC(void);
+/* ==========================================
+ * 接口函数：全部新增了 TLE5012B_SensorID 参数
+ * ========================================== */
+errorTypes readBlockCRC(TLE5012B_SensorID id);
+errorTypes getAngleSpeed(TLE5012B_SensorID id, double *angleSpeed);
+errorTypes getAngleValue(TLE5012B_SensorID id, double *angleValue);
+errorTypes getNumRevolutions(TLE5012B_SensorID id, int16_t *numRev);
 
-//returns the angle speed
-errorTypes getAngleSpeed(double *angleSpeed);
-//returns the angleValue
-errorTypes getAngleValue(double *angleValue);
-//returns the number of revolutions done
-errorTypes getNumRevolutions(int16_t *numRev);
-//returns the updated angle speed
-errorTypes getUpdAngleSpeed(double *angleSpeed);
-//returns the updated angle value
-errorTypes getUpdAngleValue(double *angleValue);
-//returns the updated number of revolutions
-errorTypes getUpdNumRevolutions(int16_t *numRev);
-//return the temperature
-errorTypes getTemperature(double *temp);
-//returns the Angle Range
-errorTypes getAngleRange(double *angleRange);
-//triggers an update in the register
-void triggerUpdate(void);
+// 更新缓冲区读取（我们将主要使用这两个）
+errorTypes getUpdAngleSpeed(TLE5012B_SensorID id, double *angleSpeed);
+errorTypes getUpdAngleValue(TLE5012B_SensorID id, double *angleValue);
+errorTypes getUpdNumRevolutions(TLE5012B_SensorID id, int16_t *numRev);
 
+errorTypes getTemperature(TLE5012B_SensorID id, double *temp);
+errorTypes getAngleRange(TLE5012B_SensorID id, double *angleRange);
 
 #endif
