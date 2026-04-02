@@ -10,6 +10,7 @@ const float SQRT_2_DIV_2 = 0.70710678f;
 const float SQRT_2 = 1.41421356f;
 USARTInstance UpdateUart; // 通讯接口
 USART_Init_Config_s init_config_update;
+    Action_OPS9_Frame_t tx_frame;
 // 初始化函数（清零）
 void Chassis_Odom_Init(void) {
     robot_odom.vx = 0.0f;
@@ -53,10 +54,10 @@ void Chassis_Odom_Update(float delta_angle_1, float delta_angle_2,
     robot_odom.x += delta_x;
     robot_odom.y += delta_y;
 }
-
+uint8_t test_tx_data[2] = {0x01, 0x02};
 void Send_Odom_As_OPS9(void)
 {
-    Action_OPS9_Frame_t tx_frame;
+
 
     // 1. 填充帧头帧尾 (严格匹配接收端的 0x0A0D 和 0x0D0A)
     tx_frame.head = 0x0A0D;
@@ -74,9 +75,10 @@ void Send_Odom_As_OPS9(void)
     tx_frame.vx = robot_odom.vx * 1000.0f; // 顺手把速度也按毫米发过去
     tx_frame.vy = robot_odom.vy * 1000.0f;
 
+
     // 4. 调用 HAL 库发送 28 字节
     // 注意超时时间设置短一点，比如 5ms，防止阻塞主循环
-//    HAL_UART_Transmit(&huart2, (uint8_t *)&tx_frame, sizeof(tx_frame), 5);
+    HAL_UART_Transmit(&huart2, (uint8_t *)&tx_frame, sizeof(tx_frame), 5);
 
-USARTSend(&UpdateUart,(uint8_t *)&tx_frame, sizeof(tx_frame),USART_TRANSFER_BLOCKING);
+USARTSend(&UpdateUart,(uint8_t *)&tx_frame, sizeof(tx_frame),USART_TRANSFER_DMA);
 }
