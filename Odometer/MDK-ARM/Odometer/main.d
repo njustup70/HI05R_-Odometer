@@ -24,4 +24,4 @@ odometer/main.o: ..\Core\Src\main.c ..\Core\Inc\main.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_uart.h \
   ..\Core\Inc\dma.h ..\Core\Inc\spi.h ..\Core\Inc\usart.h \
   ..\Core\Inc\gpio.h BSP\bsp_usart.h BSP\HI05R.h \
-  ..\DTek_Src\DTek_TLE5012B.h
+  ..\DTek_Src\DTek_TLE5012B.h Odom\chassis_odom.h

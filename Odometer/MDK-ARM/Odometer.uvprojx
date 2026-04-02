@@ -341,7 +341,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F405xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;./BSP;..\DTek_Src</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;./BSP;..\DTek_Src;.\Odom</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -646,6 +646,16 @@
               <FileName>DTek_TLE5012B.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\DTek_Src\DTek_TLE5012B.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Odom</GroupName>
+          <Files>
+            <File>
+              <FileName>chassis_odom.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Odom\chassis_odom.c</FilePath>
             </File>
           </Files>
         </Group>

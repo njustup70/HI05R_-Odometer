@@ -26,6 +26,7 @@
 "odometer\bsp_usart.o"
 "odometer\hi05r.o"
 "odometer\dtek_tle5012b.o"
+"odometer\chassis_odom.o"
 --strict --scatter "Odometer\Odometer.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers
