@@ -8,7 +8,8 @@ ChassisOdom_t robot_odom;
 const float PI_DIV_180 = 0.01745329f;  
 const float SQRT_2_DIV_2 = 0.70710678f;
 const float SQRT_2 = 1.41421356f;
-
+USARTInstance UpdateUart; // 通讯接口
+USART_Init_Config_s init_config_update;
 // 初始化函数（清零）
 void Chassis_Odom_Init(void) {
     robot_odom.vx = 0.0f;
@@ -17,6 +18,11 @@ void Chassis_Odom_Init(void) {
     robot_odom.x = 0.0f;
     robot_odom.y = 0.0f;
     robot_odom.yaw = 0.0f;
+	
+	  init_config_update.usart_handle = &huart1;
+  init_config_update.recv_buff_size = 100;
+  USARTRegister(&UpdateUart, &init_config_update);
+	
 }
 
 // 核心更新函数
@@ -46,4 +52,31 @@ void Chassis_Odom_Update(float delta_angle_1, float delta_angle_2,
 
     robot_odom.x += delta_x;
     robot_odom.y += delta_y;
+}
+
+void Send_Odom_As_OPS9(void)
+{
+    Action_OPS9_Frame_t tx_frame;
+
+    // 1. 填充帧头帧尾 (严格匹配接收端的 0x0A0D 和 0x0D0A)
+    tx_frame.head = 0x0A0D;
+    tx_frame.tail = 0x0D0A;
+
+    // 2. 填充核心数据并转换单位
+    // 弧度转度 (rad * 180 / PI)
+    tx_frame.yaw = robot_odom.yaw * 57.2957795f; 
+    // 米转毫米 (m * 1000)
+    tx_frame.x   = robot_odom.x * 1000.0f;
+    tx_frame.y   = robot_odom.y * 1000.0f;
+
+    // 3. 填充未使用/冗余数据 (为了凑够 28 字节)
+    tx_frame.z_reserved = 0.0f;
+    tx_frame.vx = robot_odom.vx * 1000.0f; // 顺手把速度也按毫米发过去
+    tx_frame.vy = robot_odom.vy * 1000.0f;
+
+    // 4. 调用 HAL 库发送 28 字节
+    // 注意超时时间设置短一点，比如 5ms，防止阻塞主循环
+//    HAL_UART_Transmit(&huart2, (uint8_t *)&tx_frame, sizeof(tx_frame), 5);
+
+USARTSend(&UpdateUart,(uint8_t *)&tx_frame, sizeof(tx_frame),USART_TRANSFER_BLOCKING);
 }

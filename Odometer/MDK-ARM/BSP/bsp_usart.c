@@ -44,7 +44,7 @@ void USARTSend(USARTInstance *_instance, uint8_t *send_buf, uint16_t send_size, 
     switch (mode)
     {
     case USART_TRANSFER_BLOCKING:
-        HAL_UART_Transmit(_instance->usart_handle, send_buf, send_size, 100);
+        HAL_UART_Transmit(_instance->usart_handle, send_buf, send_size, 5);
         break;
     case USART_TRANSFER_IT:
         HAL_UART_Transmit_IT(_instance->usart_handle, send_buf, send_size);

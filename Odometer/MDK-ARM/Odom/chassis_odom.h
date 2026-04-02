@@ -2,8 +2,9 @@
 #define __CHASSIS_ODOM_H
 
 #include <stdint.h>
-
-// ========== 底盘机械参数定义 (请根据实际情况修改) ==========
+#include "bsp_usart.h"
+#include "usart.h"
+// ========== 底盘机械参数定义 ==========
 #define WHEEL_RADIUS   0.0237375f  // 轮子半径 (单位：米)
 #define CHASSIS_L      0.150f      // 旋转中心到轮子的力臂长度 (单位：米)
 
@@ -19,6 +20,20 @@ typedef struct {
     float y;        // 全局 Y 坐标 (m)
     float yaw;      // 全局 Yaw 航向角 (rad)
 } ChassisOdom_t;
+
+
+#pragma pack(1)
+typedef struct {
+    uint16_t head;      // 帧头 0x0A0D (STM32小端模式下，实际发出去是 0x0D, 0x0A)
+    float yaw;          // 航向角 (单位: 度)
+    float x;            // X坐标 (单位: 毫米)
+    float y;            // Y坐标 (单位: 毫米)
+    float z_reserved;   // Z坐标保留值 (发 0 即可)
+    float vx;           // X方向速度 (其实接收方没用上，随便发或者发真实速度)
+    float vy;           // Y方向速度
+    uint16_t tail;      // 帧尾 0x0D0A (STM32小端模式下，实际发出去是 0x0A, 0x0D)
+} Action_OPS9_Frame_t;
+#pragma pack()
 
 // 外部声明，方便其他文件调用
 extern ChassisOdom_t robot_odom;
@@ -36,5 +51,5 @@ void Chassis_Odom_Init(void);
  */
 void Chassis_Odom_Update(float delta_angle_1, float delta_angle_2, 
                          float imu_gyr_z, float imu_yaw, float dt_s);
-
+void Send_Odom_As_OPS9(void);
 #endif

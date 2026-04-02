@@ -97,25 +97,20 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-typedef struct _update
-{
 
-} UpdateMessage;
-
-UpdateMessage upmesg;
 USARTInstance Hi05RUart;  // HIO5R
-USARTInstance UpdateUart; // 通讯接口
+
 USART_Init_Config_s init_config;
 imu_hi05r_t odom_imu;
-  static float last_total_angle_1 = 0.0f;
-  static float last_total_angle_2 = 0.0f;
-  static uint8_t is_first_loop = 1; // 用于跳过第一次循环的差分计算
+static float last_total_angle_1 = 0.0f;
+static float last_total_angle_2 = 0.0f;
+static uint8_t is_first_loop = 1; // 用于跳过第一次循环的差分计算
 
-  // 用于存放计算出的角速度
-  float omega_deg_per_sec_1 = 0.0f; // 1号磁编角速度 (度/秒)
-  float omega_deg_per_sec_2 = 0.0f; // 2号磁编角速度 (度/秒)
-  float omega_rpm_1 = 0.0f;         // 1号磁编转速 (转/分钟)
-  float omega_rpm_2 = 0.0f;         // 2号磁编转速 (转/分钟)
+// 用于存放计算出的角速度
+float omega_deg_per_sec_1 = 0.0f; // 1号磁编角速度 (度/秒)
+float omega_deg_per_sec_2 = 0.0f; // 2号磁编角速度 (度/秒)
+float omega_rpm_1 = 0.0f;         // 1号磁编转速 (转/分钟)
+float omega_rpm_2 = 0.0f;         // 2号磁编转速 (转/分钟)
 void Hi05RCallBack(void *param)
 {
   uint8_t *rx_buf = Hi05RUart.recv_buff;
@@ -194,14 +189,10 @@ int main(void)
   init_config.module_callback = Hi05RCallBack; // 这里传入的是静态函数,需要注意参数类型
   USARTRegister(&Hi05RUart, &init_config);
 
-  init_config.usart_handle = &huart1;
-  init_config.recv_buff_size = 100;
-  USARTRegister(&UpdateUart, &init_config);
+
 
   TLE_CS_Disable(TLE_SENSOR_1);
   TLE_CS_Disable(TLE_SENSOR_1);
-
-
 
   /* USER CODE END 2 */
 
@@ -246,6 +237,7 @@ int main(void)
       // 4. 计算角速度
       if (!is_first_loop && dt_s > 0.0f)
       {
+				//可能不太准，不如交给A板上的工程
         // 角度差 / 时间差 = 角速度 (度/秒)
         omega_deg_per_sec_1 = (total_angle_1 - last_total_angle_1) / dt_s;
         omega_deg_per_sec_2 = (total_angle_2 - last_total_angle_2) / dt_s;
@@ -254,16 +246,15 @@ int main(void)
         // 1转 = 360度，1分钟 = 60秒 -> RPM = (度/秒) * 60 / 360 = (度/秒) / 6.0
         omega_rpm_1 = omega_deg_per_sec_1 / 6.0f;
         omega_rpm_2 = omega_deg_per_sec_2 / 6.0f;
-				
-				
-				float delta_a1 = total_angle_1 - last_total_angle_1;
-            float delta_a2 = total_angle_2 - last_total_angle_2;
 
-            // 调用封装好的里程计更新函数！
-            // 假设 IMU 数据 gyr[2] 是 Z 轴角速度，eul[2] 是 Yaw 航向角
-            Chassis_Odom_Update(delta_a1, delta_a2, 
-                                odom_imu.gyr[2], odom_imu.eul[2], dt_s);
-				
+        float delta_a1 = total_angle_1 - last_total_angle_1;
+        float delta_a2 = total_angle_2 - last_total_angle_2;
+
+        // 调用封装好的里程计更新函数！
+        // 假设 IMU 数据 gyr[2] 是 Z 轴角速度，eul[2] 是 Yaw 航向角
+        Chassis_Odom_Update(delta_a1, delta_a2,
+                            odom_imu.gyr[2], odom_imu.eul[2], dt_s);
+				Send_Odom_As_OPS9();
       }
 
       // 更新历史数据
